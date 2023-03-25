@@ -49,14 +49,8 @@ int run_fpi(char* path)
     Matrix2d matrix;
     get_matrix(path, matrix);
 
-    std::cout << "Your matrix:\n";
-    for (const auto& i : matrix) {
-        for (const auto& j : i) {
-            std::cout << j << ' ';
-        }
-        std::cout << '\n';
-    }
-    std::cout << '\n';
+    std::cout << "Your matrix:\n"
+              << matrix << '\n';
 
     auto retp = is_fpi_applicable(matrix);
     if (!retp.first) {

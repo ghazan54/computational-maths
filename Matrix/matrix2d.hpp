@@ -39,6 +39,17 @@ Matrix2d operator-(const Matrix2d& A, const Matrix2d& B)
     return res;
 }
 
+std::ostream& operator<<(std::ostream& os, const Matrix2d& m)
+{
+    for (const auto& row : m) {
+        for (const auto& element : row) {
+            os << element << " ";
+        }
+        os << '\n';
+    }
+    return os;
+}
+
 void get_matrix(char* path, Matrix2d& ex);
 
 std::vector<double> gauss(Matrix2d& matrix);

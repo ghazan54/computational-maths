@@ -33,13 +33,8 @@ int run_gauss(char* path)
     Matrix2d matrix;
     get_matrix(path, matrix);
 
-    std::cout << "Your matrix:\n";
-    for (const auto& i : matrix) {
-        for (const auto& j : i) {
-            std::cout << j << ' ';
-        }
-        std::cout << '\n';
-    }
+    std::cout << "Your matrix:\n"
+              << matrix << '\n';
 
     std::vector<double> result = gauss(matrix);
     unsigned c = 1;
