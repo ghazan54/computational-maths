@@ -39,7 +39,7 @@ def draw(filenames, labels):
 
     plt.tight_layout()
     ax.legend()
-    fig.savefig('chart.png', dpi=300)
+    fig.savefig('interpolation.png', dpi=300)
     #fig.savefig('chart.pdf', dpi=300)
 
 if __name__ == "__main__":

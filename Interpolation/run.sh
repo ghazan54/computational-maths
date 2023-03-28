@@ -1,4 +1,4 @@
 #!/bin/bash
 
-./lagrange.out
+./interpolation.out
 python3 draw.py
