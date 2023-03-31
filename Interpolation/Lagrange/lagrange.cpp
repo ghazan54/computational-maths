@@ -1,6 +1,6 @@
 #include <interpolation.hpp>
 
-double lagrangeInterpolation(std::vector<double>& x, std::vector<double>& y, double xi)
+double lagrangeInterpolation(const std::vector<double>& x, const std::vector<double>& y, double xi)
 {
     double result = 0.0;
 

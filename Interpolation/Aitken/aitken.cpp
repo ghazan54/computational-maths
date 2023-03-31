@@ -1,6 +1,6 @@
 #include <interpolation.hpp>
 
-double aitkenInterpolation(std::vector<double>& x, std::vector<double>& y, double xi)
+double aitkenInterpolation(const std::vector<double>& x, const std::vector<double>& y, double xi)
 {
     int n = x.size();
     std::vector<double> delta(n), P(n);

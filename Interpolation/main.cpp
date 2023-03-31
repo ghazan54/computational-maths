@@ -23,6 +23,9 @@ int main(void)
     result = aitkenInterpolation(x, y, xi);
     std::cout << "Aitken: " << result << '\n';
 
+    result = newtonInterpolation(x, y, xi);
+    std::cout << "Newton: " << result << '\n';
+
     pointsTofile(x, y, result, xi);
 
     return 0;
