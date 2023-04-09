@@ -1,22 +1,34 @@
 #include <integration.hpp>
+#include <iostream>
 
-double midpoint_rule(std::function<double(double)> f, double a, double b, unsigned long n, double eps)
+double midpoint_rule(std::function<double(double)> f, double a, double b, unsigned long n0, double eps)
 {
     double sq[2] = { 0 };
-    int pos;
-    double delta = 1;
+    double ret;
+#pragma omp parallel
+    {
+        int pos;
+        double delta = 1;
+        unsigned long n = n0;
+        for (pos = 0; delta > eps; n *= 2, pos ^= 1) {
+            double h = (b - a) / n;
+            sq[pos] = 0;
+#pragma omp barrier
 
-    for (pos = 0; delta > eps; n *= 2, pos ^= 1) {
-        double h = (b - a) / n;
-        double I = 0.0;
-        for (decltype(n) i = 0; i < n; ++i) {
-            double x = a + (i * h) + (h / 2);
-            I += f(x);
+#pragma omp for nowait reduction(+ \
+                                 : sq[pos])
+            for (decltype(n) i = 0; i < n; ++i) {
+                double x = a + (i * h) + (h / 2);
+                sq[pos] += f(x) * h;
+            }
+
+#pragma omp barrier
+            delta = fabs(sq[0] - sq[1]);
         }
-        I *= h;
-        sq[pos] = I;
-        delta = fabs(sq[1] - sq[0]);
+
+#pragma omp master
+        ret = sq[pos];
     }
 
-    return sq[pos];
+    return ret;
 }
