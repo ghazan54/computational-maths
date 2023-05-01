@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <vector>
 
@@ -19,12 +20,12 @@ const double S0 = N0 - E0 - R0;
 const double I0 = 0.0;
 const double D0 = 0.0;
 
-const double _gamma = 0.001;
+const double _gamma = 0.0;
 
 double c(double t)
 {
-    double a = t < 70 ? sin(M_PI * (t - 35) / 35) : 0;
-    return std::max(0.0, std::min(2.0, 1 + c_isol * ((1 - 2 / 5) * a)));
+    double a = 1;
+    return 1 + c_isol * ((1 - 2 / 5) * a);
 }
 
 std::vector<double> func(double t, std::vector<double> Y)
@@ -35,7 +36,7 @@ std::vector<double> func(double t, std::vector<double> Y)
     double R = Y[3];
     double D = Y[4];
     double N = S + E + I + R + D;
-    double c_t = c(t);
+    double c_t = c(t - 2);
     double dSdt = -c_t * (alpha_I * S * I / N + alpha_E * S * E / N) + _gamma * R;
     double dEdt = c_t * (alpha_I * S * I / N + alpha_E * S * E / N) - (kappa + rho) * E;
     double dIdt = kappa * E - beta * I - mu * I;
@@ -45,17 +46,32 @@ std::vector<double> func(double t, std::vector<double> Y)
     return res;
 }
 
-std::vector<std::pair<double, std::vector<double>>> euler_method(std::vector<double> (*f)(double, std::vector<double>), double t_0, std::vector<double> Y_0, double h, double t_max)
+std::vector<std::pair<double, std::vector<double>>> euler_method(std::function<std::vector<double>(double, std::vector<double>)> f, double t_0, std::vector<double> Y_0, double h, double t_max, double eps = 0.001)
 {
     double t = t_0;
     std::vector<double> Y = Y_0;
     std::vector<std::pair<double, std::vector<double>>> solution = { { t, Y } };
     while (t < t_max) {
+        std::vector<double> Y_loc = Y;
         for (size_t i = 0; i < Y.size(); ++i) {
-            Y[i] += h * f(t, Y)[i];
+            Y_loc[i] += h * f(t, Y)[i];
         }
-        t = t + h;
-        solution.push_back({ t, Y });
+        std::vector<double> Y_corr = Y;
+        for (size_t i = 0; i < Y.size(); ++i) {
+            Y_corr[i] += (h / 2) * (f(t, Y)[i] + f(t + h, Y_loc)[i]);
+        }
+        std::vector<double> err(Y.size());
+        for (size_t i = 0; i < Y.size(); ++i) {
+            err[i] = std::abs(Y_corr[i] - Y_loc[i]);
+        }
+        double max_err = *std::max_element(err.begin(), err.end());
+        if (max_err < eps) {
+            t = t + h;
+            Y = Y_corr;
+            solution.push_back({ t, Y });
+        } else {
+            h /= 2;
+        }
     }
     return solution;
 }
@@ -64,9 +80,9 @@ int main(void)
 {
     double t_0 = 0.0;
     double t_max = 90.0;
-    double h = 0.1;
+    double h = 1;
     std::vector<double> Y_0 = { S0, E0, I0, R0, D0 };
-    std::vector<std::pair<double, std::vector<double>>> solution = euler_method(func, t_0, Y_0, h, t_max);
+    std::vector<std::pair<double, std::vector<double>>> solution = euler_method(func, t_0, Y_0, h, t_max, 10e-2);
 
     std::cout << "Time (days)\tSusceptible\tExposed\tInfected\tRecovered\tDead" << '\n';
     for (auto& sol : solution) {
